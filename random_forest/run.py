@@ -80,7 +80,6 @@ def go(args):
 
     ######################################
     # Fit the pipeline sk_pipe by calling the .fit method on X_train and y_train
-    # YOUR CODE HERE
     ######################################
     sk_pipe.fit(X_train[processed_features], y_train)
     # Compute r2 and MAE
@@ -105,7 +104,6 @@ def go(args):
     ######################################
     # Save the sk_pipe pipeline as a mlflow.sklearn model in the directory "random_forest_dir"
     # HINT: use mlflow.sklearn.save_model
-    # YOUR CODE HERE
     ######################################
     #if args.export_artifact != "null":
 
@@ -124,12 +122,11 @@ def go(args):
     # type, provide a description and add rf_config as metadata. Then, use the .add_dir method of the artifact instance
     # you just created to add the "random_forest_dir" directory to the artifact, and finally use
     # run.log_artifact to log the artifact to the run
-    # YOUR CODE HERE
     ######################################
         artifact=wandb.Artifact(args.output_artifact,
             type="model_export", 
-            description="RFC pipe")#,
-           # metadata=dict(args.rf_config))
+            description="RFC pipe",#,
+            metadata=rf_config) #remember rf_config has already been opened in go(), so we don't use args.rf_config
         artifact.add_dir(export_path)
         run.log_artifact(artifact)
         artifact.wait()   
@@ -143,8 +140,7 @@ def go(args):
     run.summary['mae'] = mae
     #run.summary['AUC'] = auc
     # Now log the variable "mae" under the key "mae".
-    # YOUR CODE HERE
-    ######################################
+  
 
     # Upload to W&B the feture importance visualization
     run.log(
