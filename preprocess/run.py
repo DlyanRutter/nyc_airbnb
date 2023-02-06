@@ -15,16 +15,16 @@ def go(args):
     run = wandb.init(job_type="process_data")
 
     logger.info("Downloading artifact")
-    artifact = run.use_artifact(args.input_artifact)
+    artifact = run.use_artifact(args.input_artifact, type='raw_data')
     artifact_path = artifact.file()
-
-    df = pd.read_csv(artifact_path)
+    df = pd.read_csv(artifact_path, low_memory=False)
 
     # Drop the duplicates
     logger.info("Dropping duplicates")
     df = df.drop_duplicates().reset_index(drop=True)
 
     logger.info("Dropping outliers")
+    print (list(df.columns))
     idx = df['price'].between(args.min_price, args.max_price)
     df = df[idx].copy()
     # Convert last_review to datetime
@@ -33,12 +33,12 @@ def go(args):
     
     idx = df['longitude'].between(-74.25, -73.50) & df['latitude'].between(40.5, 41.2)
     df = df[idx].copy()
-    df.to_csv(args.artifact_name, index=False) ###### had to add index=FAlse
+    df.to_csv(args.output_name, index=False) ###### had to add index=FAlse
 
     artifact = wandb.Artifact(
-        name=args.artifact_name,
-        type=args.artifact_type,
-        description=args.artifact_description,
+        name=args.output_name,
+        type=args.output_type,
+        description=args.output_description,
     )
     artifact.add_file(filename)
 
@@ -62,15 +62,15 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--artifact_name", type=str, help="Name for the artifact", required=True
+        "--output_name", type=str, help="Name for the artifact", required=True
     )
 
     parser.add_argument(
-        "--artifact_type", type=str, help="Type for the artifact", required=True
+        "--output_type", type=str, help="Type for the artifact", required=True
     )
 
     parser.add_argument(
-        "--artifact_description",
+        "--output_description",
         type=str,
         help="Description for the artifact",
         required=True,
