@@ -36,10 +36,10 @@ def go(args):
 
             logger.info("Creating artifact")
             artifact = wandb.Artifact(
-                name=args.artifact_name,
-                type=args.artifact_type,
-                description=args.artifact_description,
-                metadata={'original_url': args.file_url}
+                name=args.artifact_name, #was artifact_name
+                type=args.artifact_type, # was artifact_type
+                description=args.artifact_description, # was artifact_description
+                metadata={'sample_url': args.file_url}
             )
             artifact.add_file(fp.name, name=basename)
 
