@@ -1,20 +1,24 @@
 main:
-  components_repository: "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices#components"
+  download_repository: "https://github.com/DlyanRutter/nyc_airbnb#download" #components_repository: "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices#components"
+  # remember #download has has an MLproject inside it, also a file "data" containing the data
   src_repository: "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices#src" #mine
   project_name: nyc_airbnb
   experiment_name: development
   execute_steps:
     - download
-    - preprocess
+    - basic_cleaning #was preprocess
     - check_data
     - segregate
     - random_forest
     - test_regression_model
+    - EDA
   random_seed: 42
 data:
-  file_url: #"https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices/blob/main/components/get_data/data/sample1.csv?raw=true"
+  file_url: "https://github.com/DlyanRutter/nyc_airbnb/blob/main/data/sample1.csv?raw=True" # "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices/blob/main/components/get_data/data/sample1.csv?raw=true"
+  ### NOTE: DATA MUST HAVE ITS OWN FOLDER IN THE MAIN DIRECTORY. DATA FOLDER CANNOT BE IN A DIRECTORY THAT ALREADY HAS AN MLPROJECT
   reference_dataset: "nyc_airbnb/preprocessed_data.csv:latest"
-  sample: "sample1.csv"
+  sample: "sample1.csv" #"sample2.csv" # can change this in command line with -P hydra_options="data.sample='new_sample.csv'"
+  eda_sample: "sample1.csv"
   kl_threshold: 0.05
   test_size: 0.2
   val_size: 0.2
