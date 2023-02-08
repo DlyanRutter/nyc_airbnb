@@ -10,32 +10,26 @@ def go(config: DictConfig):
     os.environ["WANDB_PROJECT"] = config["main"]["project_name"]
     os.environ["WANDB_RUN_GROUP"] = config["main"]["experiment_name"]
 
-    # Steps to execute
-    #steps_par = config['main']['steps']
-    #active_steps = steps_par.split(",") if steps_par != "all" else _steps
+
     root_path = hydra.utils.get_original_cwd()
     if isinstance(config["main"]["execute_steps"], str):
         steps_to_execute = config["main"]["execute_steps"].split(",")
     else:
-        #print (type(config["main"]["execute_steps"]))
-        #assedrt isinstance(config["main"]["execute_steps"], list)
         steps_to_execute = config["main"]["execute_steps"]
 
 
-    if "download" in steps_to_execute:#active_steps:
+    if "download" in steps_to_execute:
         # Download file and load in W&B
         _ = mlflow.run(
-            #os.path.join(root_path, "download"),
-            config['main']['download_repository'], ##f"{config['main']['components_repository']}/get_data",
+            f"{config['main']['download_repository']}", 
             version="main",
             entry_point="main",
             parameters={
-                    "file_url": config["data"]["file_url"], 
-                    "artifact_name": "raw_data.csv", 
-                    "artifact_type": "raw_data", 
-                    "artifact_description": "Raw file as downloaded" 
-                },
-            )
+                    "file_url": config["data"]["file_url"],
+                    "artifact_name": config["data"]["raw_data_name"],#"raw_data.csv", 
+                    "artifact_type": config["data"]["raw_data_type"], # "raw_data", 
+                    "artifact_description": config["data"]["raw_data_description"]}) #"Raw file as downloaded" 
+
 
     if "basic_cleaning" in steps_to_execute:
 
@@ -43,8 +37,8 @@ def go(config: DictConfig):
             os.path.join(root_path, "basic_cleaning"),
             entry_point="main",
             parameters={
-                "input_artifact": "raw_data.csv:latest",
-                "output_name": "preprocessed_data.csv", #was artifact_name
+                "input_artifact": config["data"]["raw_data_artifact"], #"raw_data.csv:latest",
+                "output_name": config["data"]["preprocessed_data"], #was artifact_name
                 "output_type": "preprocessed_data", # was artifact_type
                 "output_description": "Data with preprocessing applied", #was artifact description
                 "min_price": config["data"]["min_price"],
@@ -57,27 +51,26 @@ def go(config: DictConfig):
             entry_point="main",
             parameters={
                 "reference_artifact": config["data"]["reference_dataset"],
-                "sample_artifact": "preprocessed_data.csv:latest",
+                "sample_artifact": config["data"]["preprocessed_data_latest"], # "preprocessed_data.csv:latest",
                 "kl_threshold": config["data"]["kl_threshold"],
                 "min_price": config["data"]["min_price"],
                 "max_price": config["data"]["max_price"]})
 
-    if "EDA" in steps_to_execute:
-        _ = mlflow.run(
-            os.path.join(root_path, "EDA"),
-            entry_point="main")
+  #  if "EDA" in steps_to_execute:
+  #      _ = mlflow.run(
+  #          os.path.join(root_path, "EDA"),
+  #          entry_point="main")
 
     if "segregate" in steps_to_execute:
         _ = mlflow.run(
             os.path.join(root_path, "segregate"),
             entry_point="main",
             parameters={
-                "input_artifact": "preprocessed_data.csv:latest",
+                "input_artifact": config["data"]["preprocessed_data_latest"], #preprocessed_data.csv:latest",
                 "artifact_root": "data",
                 "artifact_type": "segregated_data",
                 "test_size": config["data"]["test_size"],
-                "stratify": config["data"]["stratify"]
-            })
+                "stratify": config["data"]["stratify"]})
 
     if "random_forest" in steps_to_execute:
 
@@ -90,9 +83,9 @@ def go(config: DictConfig):
             fp.write(OmegaConf.to_yaml(config["random_forest_pipeline"]))
         _ = mlflow.run(
             os.path.join(root_path, "random_forest"),
-            entry_point="main", #might have an issue here
+            entry_point="main", 
             parameters={
-                "trainval_artifact": "data_train.csv:latest",
+                "trainval_artifact": config["data"]["train_data"], #"data_train.csv:latest",
                 "rf_config": rf_config,
                 "output_artifact": config["random_forest_pipeline"]["output_artifact"],
                 "random_seed": config["main"]["random_seed"],
@@ -101,14 +94,13 @@ def go(config: DictConfig):
                 "max_tfidf_features": config["random_forest_pipeline"]["max_tfidf_features"]})
             
 
-
     if "test_regression_model" in steps_to_execute:
         _ = mlflow.run(
             os.path.join(root_path, "test_regression_model"),
             entry_point="main",
             parameters={
-                "mlflow_model": f"{config['random_forest_pipeline']['output_artifact']}:prod", #was latest
-                "test_dataset": "data_test.csv:latest"})
+                "mlflow_model": f"{config['random_forest_pipeline']['output_artifact']}:prod", 
+                "test_dataset": config["data"]["test_data"]})# "data_test.csv:latest"})
 
 
 if __name__ == "__main__":
