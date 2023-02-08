@@ -1,5 +1,5 @@
 main:
-  download_repository: "https://github.com/DlyanRutter/nyc_airbnb#download" #components_repository: "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices#components"
+  download_repository: "https://github.com/DlyanRutter/nyc_airbnb#download" # #download" #components_repository: "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices#components"
   # remember #download has has an MLproject inside it, also a file "data" containing the data
   src_repository: "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices#src" #mine
   project_name: nyc_airbnb
@@ -16,12 +16,22 @@ main:
 data:
   file_url: "https://github.com/DlyanRutter/nyc_airbnb/blob/main/data/sample1.csv?raw=True" # "https://github.com/udacity/build-ml-pipeline-for-short-term-rental-prices/blob/main/components/get_data/data/sample1.csv?raw=true"
   ### NOTE: DATA MUST HAVE ITS OWN FOLDER IN THE MAIN DIRECTORY. DATA FOLDER CANNOT BE IN A DIRECTORY THAT ALREADY HAS AN MLPROJECT
+  ### Actually it's easier to just put it in both
   reference_dataset: "nyc_airbnb/preprocessed_data.csv:latest"
+  raw_data_name: "raw_data.csv"
+  raw_data_type: "raw_data"
+  raw_data_description: "Raw file as downloaded"
+  raw_data_artifact: "raw_data.csv:latest"
+  preprocessed_data: "preprocessed_data.csv"
+  preprocessed_data_latest: "preprocessed_data.csv:latest"
   sample: "sample1.csv" #"sample2.csv" # can change this in command line with -P hydra_options="data.sample='new_sample.csv'"
   eda_sample: "sample1.csv"
+  train_data: "data_train.csv:latest"
+  test_data: "data_test.csv:latest"
   kl_threshold: 0.05
   test_size: 0.2
   val_size: 0.2
+  #preprocessed_data: "preprocessed_data.csv"
   stratify_by: neighbourhood_group
   stratify: neighbourhood_group
   min_price: 10
